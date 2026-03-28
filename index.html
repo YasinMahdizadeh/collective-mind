@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Collective Mind</title>
+</head>
+
+<body style="font-family:sans-serif; text-align:center; margin-top:50px;">
+
+<h2>Share your thought</h2>
+
+<input id="word" placeholder="Enter a word..." />
+<button onclick="send()">Send</button>
+
+<script>
+async function send() {
+  const word = document.getElementById("word").value;
+
+  await fetch("https://YOUR_PROJECT.supabase.co/rest/v1/words", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "apikey": "YOUR_ANON_KEY",
+      "Authorization": "Bearer YOUR_ANON_KEY"
+    },
+    body: JSON.stringify({ text: word })
+  });
+
+  alert("Sent!");
+}
+</script>
+
+</body>
+</html>
