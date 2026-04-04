@@ -15,12 +15,12 @@
 async function send() {
   const word = document.getElementById("word").value;
 
-  await fetch("https://YOUR_PROJECT.supabase.co/rest/v1/words", {
+  await fetch("https://ungnwrtlrmbasmukwwml.supabase.co/rest/v1/words", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "apikey": "YOUR_ANON_KEY",
-      "Authorization": "Bearer YOUR_ANON_KEY"
+      "apikey": "sb_publishable_VU5ebnrUHOSGd_H5r2AS8A_5tUgU4lH",
+      "Authorization": "Bearer sb_publishable_VU5ebnrUHOSGd_H5r2AS8A_5tUgU4lH"
     },
     body: JSON.stringify({ text: word })
   });
