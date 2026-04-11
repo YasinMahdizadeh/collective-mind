@@ -1,60 +1,42 @@
-<!doctype html>
-<html>
-  <head>
-    <title>Collective Mind</title>
-  </head>
+<script>
+async function send() {
+  const word = document.getElementById("word").value;
 
-  <body style="font-family: sans-serif; text-align: center; margin-top: 50px">
-    <h2>Love?</h2>
+  // 👉 1. hole letztes keyword
+  const res = await fetch(
+    "https://ungnwrtlrmbasmukwwml.supabase.co/rest/v1/keywords?select=keyword&order=id.desc&limit=1",
+    {
+      headers: {
+        apikey: "DEIN_ANON_KEY",
+        Authorization: "Bearer DEIN_ANON_KEY",
+      },
+    }
+  );
 
-    <input id="word" placeholder="Enter a word..." />
-    <button onclick="send()">Send</button>
+  const data = await res.json();
 
-    <script>
-      async function send() {
-        const word = document.getElementById("word").value;
+  let latestKeyword = "";
+  if (data.length > 0) {
+    latestKeyword = data[0].keyword;
+  }
 
-        await fetch("https://ungnwrtlrmbasmukwwml.supabase.co/rest/v1/words", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            apikey: "sb_publishable_VU5ebnrUHOSGd_H5r2AS8A_5tUgU4lH",
-            Authorization:
-              "Bearer sb_publishable_VU5ebnrUHOSGd_H5r2AS8A_5tUgU4lH",
-          },
-          body: JSON.stringify({ text: word }),
-        });
+  // 👉 2. sende beides an words Tabelle
+  await fetch(
+    "https://ungnwrtlrmbasmukwwml.supabase.co/rest/v1/words",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: "DEIN_ANON_KEY",
+        Authorization: "Bearer DEIN_ANON_KEY",
+      },
+      body: JSON.stringify({
+        text: word,
+        con_word: latestKeyword,
+      }),
+    }
+  );
 
-        alert("Sent!");
-      }
-    </script>
-
-    <!-- getting words -->
-
-    <h1>Keywords</h1>
-    <ul id="list"></ul>
-
-    <script>
-      const url =
-        "https://ungnwrtlrmbasmukwwml.supabase.co/rest/v1/keywords?select=keyword&order=id.desc&limit=1";
-
-      fetch(url, {
-        headers: {
-          apikey: "sb_publishable_VU5ebnrUHOSGd_H5r2AS8A_5tUgU4lH",
-          Authorization:
-            "Bearer sb_publishable_VU5ebnrUHOSGd_H5r2AS8A_5tUgU4lH",
-        },
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          const list = document.getElementById("list");
-
-          data.forEach((item) => {
-            const li = document.createElement("li");
-            li.textContent = item.keyword;
-            list.appendChild(li);
-          });
-        });
-    </script>
-  </body>
-</html>
+  alert("Sent!");
+}
+</script>
