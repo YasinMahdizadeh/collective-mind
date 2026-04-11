@@ -1,33 +1,60 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-  <title>Collective Mind</title>
-</head>
+  <head>
+    <title>Collective Mind</title>
+  </head>
 
-<body style="font-family:sans-serif; text-align:center; margin-top:50px;">
+  <body style="font-family: sans-serif; text-align: center; margin-top: 50px">
+    <h2>Love?</h2>
 
-<h2>Share your thoughts.</h2>
+    <input id="word" placeholder="Enter a word..." />
+    <button onclick="send()">Send</button>
 
-<input id="word" placeholder="Enter a word..." />
-<button onclick="send()">Send</button>
+    <script>
+      async function send() {
+        const word = document.getElementById("word").value;
 
-<script>
-async function send() {
-  const word = document.getElementById("word").value;
+        await fetch("https://ungnwrtlrmbasmukwwml.supabase.co/rest/v1/words", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: "sb_publishable_VU5ebnrUHOSGd_H5r2AS8A_5tUgU4lH",
+            Authorization:
+              "Bearer sb_publishable_VU5ebnrUHOSGd_H5r2AS8A_5tUgU4lH",
+          },
+          body: JSON.stringify({ text: word }),
+        });
 
-  await fetch("https://ungnwrtlrmbasmukwwml.supabase.co/rest/v1/words", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "apikey": "sb_publishable_VU5ebnrUHOSGd_H5r2AS8A_5tUgU4lH",
-      "Authorization": "Bearer sb_publishable_VU5ebnrUHOSGd_H5r2AS8A_5tUgU4lH"
-    },
-    body: JSON.stringify({ text: word })
-  });
+        alert("Sent!");
+      }
+    </script>
 
-  alert("Sent!");
-}
-</script>
+    <!-- getting words -->
 
-</body>
+    <h1>Keywords</h1>
+    <ul id="list"></ul>
+
+    <script>
+      const url =
+        "https://ungnwrtlrmbasmukwwml.supabase.co/rest/v1/keywords?select=keyword";
+
+      fetch(url, {
+        headers: {
+          apikey: "sb_publishable_VU5ebnrUHOSGd_H5r2AS8A_5tUgU4lH",
+          Authorization:
+            "Bearer sb_publishable_VU5ebnrUHOSGd_H5r2AS8A_5tUgU4lH",
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          const list = document.getElementById("list");
+
+          data.forEach((item) => {
+            const li = document.createElement("li");
+            li.textContent = item.keyword;
+            list.appendChild(li);
+          });
+        });
+    </script>
+  </body>
 </html>
