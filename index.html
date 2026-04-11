@@ -14,15 +14,36 @@
       async function send() {
         const word = document.getElementById("word").value;
 
+        // 👉 1. hole letztes keyword
+        const res = await fetch(
+          "https://ungnwrtlrmbasmukwwml.supabase.co/rest/v1/keywords?select=keyword&order=id.desc&limit=1",
+          {
+            headers: {
+              apikey: "DEIN_ANON_KEY",
+              Authorization: "Bearer DEIN_ANON_KEY",
+            },
+          },
+        );
+
+        const data = await res.json();
+
+        let latestKeyword = "";
+        if (data.length > 0) {
+          latestKeyword = data[0].keyword;
+        }
+
+        // 👉 2. sende beides an words Tabelle
         await fetch("https://ungnwrtlrmbasmukwwml.supabase.co/rest/v1/words", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            apikey: "sb_publishable_VU5ebnrUHOSGd_H5r2AS8A_5tUgU4lH",
-            Authorization:
-              "Bearer sb_publishable_VU5ebnrUHOSGd_H5r2AS8A_5tUgU4lH",
+            apikey: "DEIN_ANON_KEY",
+            Authorization: "Bearer DEIN_ANON_KEY",
           },
-          body: JSON.stringify({ text: word }),
+          body: JSON.stringify({
+            text: word,
+            con_word: latestKeyword,
+          }),
         });
 
         alert("Sent!");
