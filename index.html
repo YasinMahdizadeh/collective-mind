@@ -35,26 +35,32 @@
     <ul id="list"></ul>
 
     <script>
-      const url =
-        "https://ungnwrtlrmbasmukwwml.supabase.co/rest/v1/keywords?select=keyword&order=id.desc&limit=1";
+      async function loadKeyword() {
+        const url =
+          "https://ungnwrtlrmbasmukwwml.supabase.co/rest/v1/keywords?select=keyword&order=id.desc&limit=1";
 
-      fetch(url, {
-        headers: {
-          apikey: "sb_publishable_VU5ebnrUHOSGd_H5r2AS8A_5tUgU4lH",
-          Authorization:
-            "Bearer sb_publishable_VU5ebnrUHOSGd_H5r2AS8A_5tUgU4lH",
-        },
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          const list = document.getElementById("list");
-
-          data.forEach((item) => {
-            const li = document.createElement("li");
-            li.textContent = item.keyword;
-            list.appendChild(li);
-          });
+        const res = await fetch(url, {
+          headers: {
+            apikey: "DEIN_ANON_KEY",
+            Authorization: "Bearer DEIN_ANON_KEY",
+          },
         });
-    </script>
+
+        const data = await res.json();
+
+        if (data.length > 0) {
+          const latestKeyword = data[0].keyword;
+
+          // 👉 H2 ändern
+          document.querySelector("h2").textContent = latestKeyword;
+        }
+      }
+
+      // einmal laden
+      loadKeyword();
+
+      // optional: live refresh
+      setInterval(loadKeyword, 3000);
+      </script>
   </body>
 </html>
