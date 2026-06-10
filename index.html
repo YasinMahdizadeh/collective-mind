@@ -26,8 +26,9 @@
 
       body {
         margin: 0;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
         background: linear-gradient(135deg, var(--bg-from), var(--bg-to));
         color: var(--text);
         display: flex;
@@ -89,7 +90,9 @@
         border: none;
         border-radius: 12px;
         cursor: pointer;
-        transition: background-color 0.2s ease, transform 0.1s ease;
+        transition:
+          background-color 0.2s ease,
+          transform 0.1s ease;
       }
 
       button:hover {
@@ -137,9 +140,14 @@
   <body>
     <main class="card">
       <h1>Bitte, gib mir nur ein Wort!</h1>
-      <p class="subtitle">Dein Wort wird mit dem letzten Keyword verbunden.</p>
+      <p class="subtitle">Dein Wort wird zu den letzten Wörtern hinzugefügt.</p>
 
-      <form onsubmit="event.preventDefault(); send();">
+      <form
+        onsubmit="
+          event.preventDefault();
+          send();
+        "
+      >
         <input id="word" placeholder="Enter a word..." autocomplete="off" />
         <button type="submit">Send</button>
       </form>
