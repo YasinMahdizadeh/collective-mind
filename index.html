@@ -280,6 +280,11 @@
         return BLOCKED_WORDS.some((blocked) => normalized.includes(blocked));
       }
 
+      // Wörter mit großem Anfangsbuchstaben (z.B. Namen) werden zensiert
+      function startsUppercase(word) {
+        return /^[A-ZÄÖÜ]/.test(word);
+      }
+
       async function send() {
         const input = document.getElementById("word");
         const messageEl = document.getElementById("message");
@@ -292,7 +297,7 @@
           return;
         }
 
-        if (isInappropriate(word)) {
+        if (isInappropriate(word) || startsUppercase(word)) {
           // Tut so, als wäre alles normal gelaufen, sendet aber nichts
           alert("Sent!");
           input.value = "";
