@@ -8,11 +8,12 @@
       :root {
         --bg-from: #6366f1;
         --bg-to: #8b5cf6;
-        --card-bg: #ffffff;
+        --card-bg: rgba(255, 255, 255, 0.85);
         --text: #1f2937;
         --muted: #6b7280;
         --accent: #6366f1;
         --accent-hover: #4f46e5;
+        --danger: #dc2626;
       }
 
       * {
@@ -38,10 +39,30 @@
         padding: 24px;
       }
 
+      /* Live-Hintergrund aus TouchDesigner */
+      .bg-video {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        z-index: -2;
+      }
+
+      /* abdunkeln, damit die Karte immer lesbar bleibt */
+      .bg-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.35);
+        z-index: -1;
+      }
+
       .card {
         background: var(--card-bg);
         border-radius: 20px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
         padding: 40px 32px;
         width: 100%;
         max-width: 480px;
@@ -103,6 +124,13 @@
         transform: scale(0.98);
       }
 
+      .message {
+        margin: 12px 0 0;
+        min-height: 1.2em;
+        font-size: 0.9rem;
+        color: var(--danger);
+      }
+
       /* Tablet (iPad) and up: input + button side by side */
       @media (min-width: 600px) {
         .card {
@@ -138,6 +166,9 @@
   </head>
 
   <body>
+    <img id="bg-video" class="bg-video" alt="" />
+    <div class="bg-overlay"></div>
+
     <main class="card">
       <h1>Bitte, gib mir nur ein Wort!</h1>
       <p class="subtitle">Dein Wort wird zu den letzten Wörtern hinzugefügt.</p>
@@ -151,11 +182,121 @@
         <input id="word" placeholder="Enter a word..." autocomplete="off" />
         <button type="submit">Send</button>
       </form>
+
+      <p id="message" class="message"></p>
     </main>
 
     <script>
+      // 👉 Live-Hintergrund aus TouchDesigner (Web Server DAT, JPEG-Snapshot)
+      // IP-Adresse + Pfad an deinen TouchDesigner-Rechner anpassen (im
+      // selben WLAN). Beispiel: "http://192.168.1.50:9980/cam.jpg"
+      const TD_STREAM_URL = "http://192.168.1.50:9980/cam.jpg";
+      const TD_REFRESH_MS = 100; // ~10 Bilder pro Sekunde
+
+      function startBackgroundStream() {
+        const bg = document.getElementById("bg-video");
+
+        bg.addEventListener("error", () => {
+          // TD nicht erreichbar -> Bild ausblenden, Verlaufshintergrund bleibt
+          bg.style.display = "none";
+        });
+        bg.addEventListener("load", () => {
+          bg.style.display = "block";
+        });
+
+        setInterval(() => {
+          bg.src = TD_STREAM_URL + "?t=" + Date.now();
+        }, TD_REFRESH_MS);
+      }
+
+      startBackgroundStream();
+
+      // 👉 Liste unangemessener Begriffe (klein erweiterbar)
+      const BLOCKED_WORDS = [
+        // Deutsch
+        "arsch",
+        "arschloch",
+        "scheisse",
+        "hurensohn",
+        "hure",
+        "nutte",
+        "fotze",
+        "wichser",
+        "schlampe",
+        "missgeburt",
+        "spast",
+        "spasti",
+        "behindert",
+        "mongo",
+        "neger",
+        "kanake",
+        "schwuchtel",
+        "fick",
+        "ficken",
+        "verpissdich",
+        "drecksau",
+        "drecksack",
+        "bastard",
+        "idiot",
+        "trottel",
+        // Englisch
+        "fuck",
+        "shit",
+        "bitch",
+        "asshole",
+        "cunt",
+        "pussy",
+        "nigger",
+        "nigga",
+        "faggot",
+        "retard",
+        "whore",
+        "slut",
+        "motherfucker",
+      ];
+
+      // normalisiert Eingaben, damit einfache Umgehungen
+      // (Groß-/Kleinschreibung, Leerzeichen, Zahlen statt Buchstaben) erkannt werden
+      function normalizeWord(text) {
+        return text
+          .toLowerCase()
+          .replace(/ä/g, "a")
+          .replace(/ö/g, "o")
+          .replace(/ü/g, "u")
+          .replace(/ß/g, "ss")
+          .replace(/[@4]/g, "a")
+          .replace(/[3]/g, "e")
+          .replace(/[1!]/g, "i")
+          .replace(/[0]/g, "o")
+          .replace(/[5$]/g, "s")
+          .replace(/[7]/g, "t")
+          .replace(/[^a-z]/g, "");
+      }
+
+      function isInappropriate(word) {
+        const normalized = normalizeWord(word);
+        if (!normalized) return false;
+        return BLOCKED_WORDS.some((blocked) => normalized.includes(blocked));
+      }
+
       async function send() {
-        const word = document.getElementById("word").value;
+        const input = document.getElementById("word");
+        const messageEl = document.getElementById("message");
+        const word = input.value.trim();
+
+        messageEl.textContent = "";
+
+        if (!word) {
+          messageEl.textContent = "Bitte gib ein Wort ein.";
+          return;
+        }
+
+        if (isInappropriate(word)) {
+          // Tut so, als wäre alles normal gelaufen, sendet aber nichts
+          alert("Sent!");
+          input.value = "";
+          return;
+        }
 
         // 👉 1. hole letztes keyword
         const res = await fetch(
@@ -192,7 +333,7 @@
         });
 
         alert("Sent!");
-        document.getElementById("word").value = "";
+        input.value = "";
       }
     </script>
   </body>
