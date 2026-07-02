@@ -15,16 +15,13 @@
         --accent-hover: #4f46e5;
         --danger: #dc2626;
       }
-
       * {
         box-sizing: border-box;
       }
-
       html,
       body {
         height: 100%;
       }
-
       body {
         margin: 0;
         font-family:
@@ -38,7 +35,6 @@
         min-height: 100vh;
         padding: 24px;
       }
-
       /* Live-Hintergrund aus TouchDesigner */
       .bg-video {
         position: fixed;
@@ -48,7 +44,6 @@
         object-fit: cover;
         z-index: -2;
       }
-
       /* abdunkeln, damit die Karte immer lesbar bleibt */
       .bg-overlay {
         position: fixed;
@@ -56,7 +51,6 @@
         background: rgba(0, 0, 0, 0.35);
         z-index: -1;
       }
-
       .card {
         background: var(--card-bg);
         border-radius: 20px;
@@ -68,25 +62,21 @@
         max-width: 480px;
         text-align: center;
       }
-
       h1 {
         margin: 0 0 8px;
         font-size: clamp(1.5rem, 4vw, 2rem);
         line-height: 1.3;
       }
-
       p.subtitle {
         margin: 0 0 28px;
         color: var(--muted);
         font-size: 1rem;
       }
-
       form {
         display: flex;
         flex-direction: column;
         gap: 12px;
       }
-
       input#word {
         width: 100%;
         padding: 14px 16px;
@@ -96,11 +86,9 @@
         outline: none;
         transition: border-color 0.2s ease;
       }
-
       input#word:focus {
         border-color: var(--accent);
       }
-
       button {
         width: 100%;
         padding: 14px 16px;
@@ -115,64 +103,52 @@
           background-color 0.2s ease,
           transform 0.1s ease;
       }
-
       button:hover {
         background: var(--accent-hover);
       }
-
       button:active {
         transform: scale(0.98);
       }
-
       .message {
         margin: 12px 0 0;
         min-height: 1.2em;
         font-size: 0.9rem;
         color: var(--danger);
       }
-
       /* Tablet (iPad) and up: input + button side by side */
       @media (min-width: 600px) {
         .card {
           padding: 48px 40px;
         }
-
         form {
           flex-direction: row;
         }
-
         input#word {
           flex: 1;
         }
-
         button {
           width: auto;
           padding: 14px 28px;
         }
       }
-
       /* Desktop: a bit more breathing room */
       @media (min-width: 1024px) {
         .card {
           max-width: 560px;
           padding: 56px 48px;
         }
-
         h1 {
           font-size: 2.25rem;
         }
       }
     </style>
   </head>
-
   <body>
     <img id="bg-video" class="bg-video" alt="" />
     <div class="bg-overlay"></div>
-
     <main class="card">
       <h1>Bitte, gib mir nur ein Wort!</h1>
       <p class="subtitle">Dein Wort wird zu den letzten Wörtern hinzugefügt.</p>
-
       <form
         onsubmit="
           event.preventDefault();
@@ -182,20 +158,16 @@
         <input id="word" placeholder="Enter a word..." autocomplete="off" />
         <button type="submit">Send</button>
       </form>
-
       <p id="message" class="message"></p>
     </main>
-
     <script>
       // 👉 Live-Hintergrund aus TouchDesigner (Web Server DAT, JPEG-Snapshot)
       // IP-Adresse + Pfad an deinen TouchDesigner-Rechner anpassen (im
       // selben WLAN). Beispiel: "http://192.168.1.50:9980/cam.jpg"
       const TD_STREAM_URL = "http://192.168.1.50:9980/cam.jpg";
       const TD_REFRESH_MS = 100; // ~10 Bilder pro Sekunde
-
       function startBackgroundStream() {
         const bg = document.getElementById("bg-video");
-
         bg.addEventListener("error", () => {
           // TD nicht erreichbar -> Bild ausblenden, Verlaufshintergrund bleibt
           bg.style.display = "none";
@@ -203,14 +175,11 @@
         bg.addEventListener("load", () => {
           bg.style.display = "block";
         });
-
         setInterval(() => {
           bg.src = TD_STREAM_URL + "?t=" + Date.now();
         }, TD_REFRESH_MS);
       }
-
       startBackgroundStream();
-
       // 👉 Liste unangemessener Begriffe (klein erweiterbar)
       const BLOCKED_WORDS = [
         // Deutsch
@@ -255,7 +224,6 @@
         "slut",
         "motherfucker",
       ];
-
       // normalisiert Eingaben, damit einfache Umgehungen
       // (Groß-/Kleinschreibung, Leerzeichen, Zahlen statt Buchstaben) erkannt werden
       function normalizeWord(text) {
@@ -273,73 +241,56 @@
           .replace(/[7]/g, "t")
           .replace(/[^a-z]/g, "");
       }
-
       function isInappropriate(word) {
         const normalized = normalizeWord(word);
         if (!normalized) return false;
         return BLOCKED_WORDS.some((blocked) => normalized.includes(blocked));
       }
-
-      // Wörter mit großem Anfangsbuchstaben (z.B. Namen) werden zensiert
-      function startsUppercase(word) {
-        return /^[A-ZÄÖÜ]/.test(word);
-      }
-
       async function send() {
         const input = document.getElementById("word");
         const messageEl = document.getElementById("message");
         const word = input.value.trim();
-
         messageEl.textContent = "";
-
         if (!word) {
           messageEl.textContent = "Bitte gib ein Wort ein.";
           return;
         }
-
-        if (isInappropriate(word) || startsUppercase(word)) {
+        if (isInappropriate(word)) {
           // Tut so, als wäre alles normal gelaufen, sendet aber nichts
           alert("Sent!");
           input.value = "";
           return;
         }
-
-        // 👉 1. hole letztes keyword
-        const res = await fetch(
-          "https://ungnwrtlrmbasmukwwml.supabase.co/rest/v1/keywords?select=keyword&order=id.desc&limit=1",
-          {
-            headers: {
-              apikey: "sb_publishable_VU5ebnrUHOSGd_H5r2AS8A_5tUgU4lH",
-              Authorization:
-                "Bearer sb_publishable_VU5ebnrUHOSGd_H5r2AS8A_5tUgU4lH",
+        try {
+          const res = await fetch(
+            "https://ungnwrtlrmbasmukwwml.supabase.co/rest/v1/words",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                apikey: "sb_publishable_VU5ebnrUHOSGd_H5r2AS8A_5tUgU4lH",
+                Authorization:
+                  "Bearer sb_publishable_VU5ebnrUHOSGd_H5r2AS8A_5tUgU4lH",
+              },
+              body: JSON.stringify({
+                text: word,
+              }),
             },
-          },
-        );
-
-        const data = await res.json();
-
-        let latestKeyword = "";
-        if (data.length > 0) {
-          latestKeyword = data[0].keyword;
+          );
+          if (!res.ok) {
+            const errText = await res.text();
+            console.error("Insert failed:", res.status, errText);
+            messageEl.textContent =
+              "Konnte das Wort leider nicht senden. Bitte nochmal versuchen.";
+            return;
+          }
+          alert("Sent!");
+          input.value = "";
+        } catch (err) {
+          console.error("Network error:", err);
+          messageEl.textContent =
+            "Keine Verbindung zum Server. Bitte nochmal versuchen.";
         }
-
-        // 👉 2. sende beides an words Tabelle
-        await fetch("https://ungnwrtlrmbasmukwwml.supabase.co/rest/v1/words", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            apikey: "sb_publishable_VU5ebnrUHOSGd_H5r2AS8A_5tUgU4lH",
-            Authorization:
-              "Bearer sb_publishable_VU5ebnrUHOSGd_H5r2AS8A_5tUgU4lH",
-          },
-          body: JSON.stringify({
-            text: word,
-            con_keyword: latestKeyword,
-          }),
-        });
-
-        alert("Sent!");
-        input.value = "";
       }
     </script>
   </body>
